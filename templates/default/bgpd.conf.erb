@@ -100,7 +100,11 @@ router bgp <%= asn %>
   neighbor <%= neighbor %> next-hop-self <%= n_opts['next_hop_self'] if n_opts['next_hop_self'].is_a?(String) %>
       <% end -%>
       <% Array(n_opts['capability']).compact.each do |capa| -%>
+        <% # The only capability valid inside address-family is ORF prefix-list -%>
+        <% # Any other capability causes implicit exit-address-family -%>
+        <% if capa.start_with?('orf prefix-list') -%>
   neighbor <%= neighbor %> capability <%= capa %>
+        <% end -%>
       <% end -%>
       <% if n_opts['default_originate'] -%>
   neighbor <%= neighbor %> default-originate <%= 'route-map' if n_opts['default_originate_map'] %> <%= n_opts['default_originate_map'] %>
