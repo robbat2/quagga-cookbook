@@ -23,9 +23,9 @@
 def sort_by_bgp_neighbor(hashelem)
   key, value = hashelem
   # Newer way to use peer-group
-  is_peer_group = value.include?('peer_group') && value['peer_group'].is_a?(TrueClass)
+  is_peer_group = value && value.include?('peer_group') && value['peer_group'].is_a?(TrueClass)
   # Older, but should not break those user configurations.
-  is_peer_group |= value.include?('peer_type') && value['peer_type'] == 'peer-group'
+  is_peer_group |= value && value.include?('peer_type') && value['peer_type'] == 'peer-group'
   # 0 comes before 1.
   [is_peer_group ? 0 : 1, key, value]
 end
