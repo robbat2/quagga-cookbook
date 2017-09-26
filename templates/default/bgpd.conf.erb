@@ -34,39 +34,37 @@ router bgp <%= asn %>
           # Failure to do so will cause Quagga error: "Specify remote-as or peer-group commands first"
           # peer-group definitions also need to come BEFORE any neighbors that are members of those peer-groups
         -%>
-      <% if n_opts['peer_group'] && n_opts['peer_group'].is_a?(TrueClass) -%>
+      <% if n_opts && n_opts['peer_group'] && n_opts['peer_group'].is_a?(TrueClass) -%>
  neighbor <%= neighbor %> peer-group
       <% end -%>
-      <% if n_opts['peer_type'] -%>
+      <% if n_opts && n_opts['peer_type'] -%>
  neighbor <%= neighbor %> <%= n_opts['peer_type'] %>
       <% end -%>
-      <% if n_opts['remote_as'] -%>
+      <% if n_opts && n_opts['remote_as'] -%>
  neighbor <%= neighbor %> remote-as <%= n_opts['remote_as'] %>
       <% end -%>
-      <% if n_opts['peer_group'] && n_opts['peer_group'].is_a?(String) -%>
+      <% if n_opts && n_opts['peer_group'] && n_opts['peer_group'].is_a?(String) -%>
  neighbor <%= neighbor %> peer-group <%= n_opts['peer_group'] %>
       <% end -%>
       <% # End of required first items ######################################### -%>
-      <% if n_opts['description'] -%>
+      <% if n_opts && n_opts['description'] -%>
  neighbor <%= neighbor %> description <%= n_opts['description'] %>
       <% end -%>
-      <% if n_opts['local_as'] -%>
+      <% if n_opts && n_opts['local_as'] -%>
  neighbor <%= neighbor %> local-as <%= n_opts['local_as'] %>
       <% end -%>
-      <% if n_opts['ebgp_multihop'] -%>
+      <% if n_opts && n_opts['ebgp_multihop'] -%>
  neighbor <%= neighbor %> ebgp-multihop <%= n_opts['ebgp_multihop'] %>
       <% end -%>
-      <% if n_opts['connect_timer'] -%>
+      <% if n_opts && n_opts['connect_timer'] -%>
  neighbor <%= neighbor %> timers connect <%= n_opts['connect_timer'] %>
       <% end -%>
       <% Array(n_opts['capability']).compact.each do |capa| -%>
  neighbor <%= neighbor %> capability <%= capa %>
-      <% end -%>
-      <% if n_opts['peer_group_range'] -%>
-        <% Array(n_opts['peer_group_range']).each do |range| -%>
+      <% end if n_opts && n_opts['capability'] -%>
+      <% Array(n_opts['peer_group_range']).each do |range| -%>
  bgp listen range <%= range %> peer-group <%= neighbor %>
-        <% end -%>
-      <% end -%>
+      <% end if n_opts && n_opts['peer_group_range'] -%>
     <% end -%>
   <% end -%>
 <%-# }}} address-family independent neighbor options -%>
@@ -89,14 +87,14 @@ router bgp <%= asn %>
 <%-# {{{ address-family AF neighbor -%>
     <% next unless af_opts['neighbors'] -%>
     <% af_opts['neighbors'].sort_by(&method(:sort_by_bgp_neighbor)).each do |neighbor, n_opts| -%>
-      <% next if n_opts['ipv6'] && address_family != 'ipv6' # Skip ipv6 neighbors in ipv4 AF -%>
+      <% next if n_opts && n_opts['ipv6'] && address_family && address_family != 'ipv6' # Skip ipv6 neighbors in ipv4 AF -%>
       <% unless address_family && address_family.include?('ipv4') -%>
   neighbor <%= neighbor %> activate
       <% end -%>
-      <% if n_opts['soft_reconfig_in'] -%>
+      <% if n_opts && n_opts['soft_reconfig_in'] -%>
   neighbor <%= neighbor %> soft-reconfiguration inbound
       <% end -%>
-      <% if n_opts['next_hop_self'] -%>
+      <% if n_opts && n_opts['next_hop_self'] -%>
   neighbor <%= neighbor %> next-hop-self <%= n_opts['next_hop_self'] if n_opts['next_hop_self'].is_a?(String) %>
       <% end -%>
       <% Array(n_opts['capability']).compact.each do |capa| -%>
@@ -105,29 +103,29 @@ router bgp <%= asn %>
         <% if capa.start_with?('orf prefix-list') -%>
   neighbor <%= neighbor %> capability <%= capa %>
         <% end -%>
-      <% end -%>
-      <% if n_opts['default_originate'] -%>
+      <% end if n_opts && n_opts['capability'] -%>
+      <% if n_opts && n_opts['default_originate'] -%>
   neighbor <%= neighbor %> default-originate <%= 'route-map' if n_opts['default_originate_map'] %> <%= n_opts['default_originate_map'] %>
       <% end -%>
 <%-# {{{ neighbor prefix-list -%>
-      <% if n_opts['prefix_list_in'] -%>
+      <% if n_opts && n_opts['prefix_list_in'] -%>
   neighbor <%= neighbor %> prefix-list <%= n_opts['prefix_list_in'] %> in
       <% end -%>
-      <% if n_opts['prefix_list_out'] -%>
+      <% if n_opts && n_opts['prefix_list_out'] -%>
   neighbor <%= neighbor %> prefix-list <%= n_opts['prefix_list_out'] %> out
       <% end -%>
 <%-# }}} neighbor prefix-list -%>
 <%-# {{{ neighbor route-map -%>
-      <% if n_opts['route_map_in'] -%>
+      <% if n_opts && n_opts['route_map_in'] -%>
   neighbor <%= neighbor %> route-map <%= n_opts['route_map_in'] %> in
       <% end -%>
-      <% if n_opts['route_map_out'] -%>
+      <% if n_opts && n_opts['route_map_out'] -%>
   neighbor <%= neighbor %> route-map <%= n_opts['route_map_out'] %> out
       <% end -%>
-      <% if n_opts['route_map_import'] -%>
+      <% if n_opts && n_opts['route_map_import'] -%>
   neighbor <%= neighbor %> route-map <%= n_opts['route_map_import'] %> import
       <% end -%>
-      <% if n_opts['route_map_export'] -%>
+      <% if n_opts && n_opts['route_map_export'] -%>
   neighbor <%= neighbor %> route-map <%= n_opts['route_map_export'] %> export
       <% end -%>
 <%-# }}} neighbor route-map -%>
